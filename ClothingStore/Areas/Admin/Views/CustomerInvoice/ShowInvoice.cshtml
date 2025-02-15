@@ -1,0 +1,126 @@
+﻿@using Models.ViewModels
+@model CustomerInvoiceVM
+@{
+    int counter = 1;
+}
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+            Company Name
+        </h1>
+    </section>
+    <section class="invoice">
+        <div class="row invoice-info">
+            <div class="col-sm-4 invoice-col">
+                <b>Invoice Number:  </b> @Model.CustomerInvoice.invoiceNumber<br>
+                <b>Invoice Date:  </b>@DateTime.Now<br>
+            </div>
+            <div class="col-sm-4 invoice-col">
+                <address>
+                    <b>Customer Name:  </b>@Model.CustomerInvoice.Customer?.Name</><br>
+                    <b>Customer Phone:  </b>@Model.CustomerInvoice.Customer?.Phone<br>
+                </address>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Discount</th>
+                            <th>Sub total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.CustomerInvoiceList != null && Model.CustomerInvoiceList.Any())
+                        {
+                            foreach (var item in Model.CustomerInvoiceList)
+                            {
+                                <tr>
+                                    <td>@counter</td>
+                                    <td>@item.product?.Name</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.Price</td>
+                                    <td>@item.Discount</td>
+                                    <td>@item.SubAmount</td>
+                                </tr>
+                                counter++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4">No items found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-6">
+                <p class="lead"></p>
+                <div class="table-responsive">
+                    <form method="post" action="@Url.Action("PrintInvoice", "CustomerInvoice")">
+                        <input type="hidden" name="id" value="@Model.CustomerInvoice.Id" />
+                        <input type="hidden" id="remaining" name="remaining" />
+                        <table class="table">
+                            <tr>
+                                <th style="width:33%">Total:</th>
+                                <td id="total">
+                                    @Model.CustomerInvoice.Total
+                                </td>
+
+                                <th style="width:33%">Paid:</th>
+                                <td>
+                                    <input type="number" id="paid" name="paid" value="1" step="1" min="1" oninput="calculateRemaining()">
+                                </td>
+
+                                <th style="width:33%">Remaining:</th>
+                                <td>
+                                    <input type="text" id="remainingDisplay" readonly>
+                                </td>
+                            </tr>
+                        </table>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-print"></i> Print
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        function calculateRemaining() {
+            // Extract the total value from the <td> element
+            let totalText = document.getElementById("total").textContent.trim();
+            // Remove any currency symbols and commas, then convert to a number
+            let total = parseFloat(totalText.replace(/[^0-9.-]+/g, "")) || 0;
+
+            let paid = parseFloat(document.getElementById("paid").value) || 0;
+            let remaining = paid - total; // Calculate remaining directly
+
+            // Update the remaining display field
+            document.getElementById("remainingDisplay").value = remaining.toFixed(2);
+            // Update the hidden remaining field
+            document.getElementById("remaining").value = remaining.toFixed(2);
+        }
+
+        // Ensure correct values when the page loads
+        document.addEventListener("DOMContentLoaded", calculateRemaining);
+
+        // Update remaining value before form submission
+        document.querySelector("form").addEventListener("submit", function () {
+            calculateRemaining(); // Ensure the remaining field is updated
+        });
+    </script>
+}

@@ -1,0 +1,27 @@
+﻿@model Category
+
+<h2 class="text-black py-2">@(Model.Id != 0 ? "تعديل " : "انشاء ")فئة</h2>
+
+<hr />
+<div class="row">
+	<div class="col-md-4">
+		<form method="post" asp-action="Upsert" enctype="multipart/form-data">
+			<input asp-for="Id" type="hidden" />
+			<div class="form-group">
+				<label asp-for="Name" class="control-label"></label>
+				<input asp-for="Name" class="form-control" required/>
+				<span asp-validation-for="Name" class="text-danger"></span>
+			</div><br />
+			<div class="form-group">
+				@if (Model.Id != 0)
+				{
+					<button type="submit" class="btn btn-primary form-control">تعديل</button>
+				}
+				else
+				{
+					<button type="submit" class="btn btn-primary form-control">انشاء</button>
+				}
+			</div>
+		</form>
+	</div>
+</div>

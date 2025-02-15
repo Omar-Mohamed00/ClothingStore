@@ -1,0 +1,46 @@
+﻿<div class="watermark-container">
+    <div class="watermark">Pharmacy Management System</div>
+</div>
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden; /* Disable scrolling */
+    }
+
+    .watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(0deg);
+        color: rgb(2 2 2 / 30%);
+        font-size: 3vw;
+        font-weight: bold;
+        text-transform: uppercase;
+        pointer-events: none;
+        user-select: none;
+        white-space: nowrap;
+    }
+    .watermark-container {
+        position: relative;
+        height: 100vh; /* Takes the full height of the viewport */
+        width: 100vw; /* Takes the full width of the viewport */
+    }
+
+    .background-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 102%;
+        height: 100%;
+        object-fit: fill; /* Ensure the image covers the viewport without stretching */
+        object-position: center; /* Center the image */
+    }
+
+    .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
+        padding-left: 165px;
+        top: 55px;
+    }
+
+</style>

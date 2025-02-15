@@ -1,0 +1,60 @@
+﻿@model Models.ViewModels.ProductVM
+
+<h2 class="text-black py-2">@(Model.Medicine.Id != 0 ? "تعديل " : "انشاء ")منتج</h2>
+
+<hr />
+<div class="row">
+	<div class="col-md-4">
+		<form method="post" enctype="multipart/form-data">
+			<input asp-for="Medicine.Id" hidden />
+			<div class="form-group">
+				<label asp-for="Medicine.Name" class="control-label"></label>
+				<input asp-for="Medicine.Name" class="form-control" required />
+				<span asp-validation-for="Medicine.Name" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Medicine.Size" class="control-label"></label>
+				<input asp-for="Medicine.Size" class="form-control" required />
+				<span asp-validation-for="Medicine.Size" class="text-danger"></span>
+			</div>
+			<div class="form-group" style="margin-bottom: 10px;">
+				<label asp-for="Medicine.Quantity" class="control-label"></label>
+				<input asp-for="Medicine.Quantity" class="form-control" required />
+				<span asp-validation-for="Medicine.Quantity" class="text-danger"></span>
+			</div>
+			<div class="form-group" style="margin-bottom: 10px;">
+				<label asp-for="Medicine.PurchasePrice" class="control-label"></label>
+				<input asp-for="Medicine.PurchasePrice" class="form-control" required />
+				<span asp-validation-for="Medicine.PurchasePrice" class="text-danger"></span>
+			</div>
+			<div class="form-group" style="margin-bottom: 10px;">
+				<label asp-for="Medicine.SellingPrice" class="control-label"></label>
+				<input asp-for="Medicine.SellingPrice" class="form-control" required />
+				<span asp-validation-for="Medicine.SellingPrice" class="text-danger"></span>
+			</div>
+			
+			<div class="form-group" style="margin-bottom: 10px;">
+				<label asp-for="Medicine.Color" class="control-label"></label>
+				<input asp-for="Medicine.Color" class="form-control"/>
+				<span asp-validation-for="Medicine.Color" class="text-danger"></span>
+			</div>
+			<div class="form-group" style="margin-bottom: 10px;">
+				<label asp-for="Medicine.CategoryId" class="ms-2"></label>
+				<select asp-for="@Model.Medicine.CategoryId" asp-items="@Model.CategoryList" class="form-select border-0 shadow">
+					<option disabled selected>--اختار الفئة--</option>
+				</select>
+				<span asp-validation-for="Medicine.CategoryId" class="text-danger" ></span>
+			</div> 
+			<div class="form-group">
+				@if (Model.Medicine.Id != 0)
+				{
+					<button type="submit" class="btn btn-primary form-control">تعديل</button>
+				}
+				else
+				{
+					<button type="submit" class="btn btn-primary form-control">انشاء</button>
+				}
+			</div>
+		</form>
+	</div>
+</div>

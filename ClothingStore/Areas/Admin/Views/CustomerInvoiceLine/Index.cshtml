@@ -1,0 +1,83 @@
+﻿@model IEnumerable<CustomerInvoiceLine>
+<br />
+<a asp-controller="CustomerInvoiceLine" asp-action="Upsert" class="btn btn-primary">
+    <i class="bi bi-plus-circle-dotted"></i> Add Customer Invoice Line
+</a>
+<div style="padding-bottom: 18px;"></div>
+
+
+<table id="customerInvoiceLineTable" class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.customerInvoice.invoiceNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.product.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.product.Size)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.product.Color)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Discount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SubAmount)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.customerInvoice.invoiceNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.product.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.product.Size)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.product.Color)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Discount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SubAmount)
+                </td>
+                <td class="align-middle">
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-info rounded rounded-3 me-2" asp-action="Upsert" asp-route-id="@item.customerInvoiceLineId">
+                            <i class="bi bi-pencil-fill"></i>Edit
+                        </a>
+                        <a href="javascript:;" class="btn btn-danger rounded rounded-3 js-delete" data-id="@item.customerInvoiceLineId">
+                            <i class="bi bi-trash3"></i>Delete
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@section Scripts {
+    <script src="~/js/CustomerInvoiceLine.js" asp-append-version="true"></script>
+}

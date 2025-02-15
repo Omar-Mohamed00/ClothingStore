@@ -1,0 +1,180 @@
+﻿ @model CustomerInvoice
+ @{
+     Layout = null;
+    int counter = 1;
+ }
+
+ <!DOCTYPE html>
+
+ <html>
+ <head>
+     <meta name="viewport" content="width=device-width" />
+     <title>Print Invoice</title>
+         <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .wrapper {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .invoice-info {
+            margin-bottom: 20px;
+        }
+
+        .invoice-info address {
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .table-responsive {
+            margin-top: 20px;
+        }
+
+        .amount-details {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .wrapper {
+                width: 100%;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+ </head>
+ <body onload="window.print();">
+     <div class="wrapper">
+         <!-- Main content -->
+         <section class="invoice">
+             <!-- title row -->
+             <div class="row">
+                 <div class="col-xs-12">
+                     <h2 class="page-header">
+                         <i class="fa fa-globe"></i> Company Name
+                     </h2>
+                 </div>
+                 <!-- /.col -->
+             </div>
+             <!-- info row -->
+             <div class="row invoice-info">
+                 <!-- /.col -->
+                 <div class="col-sm-4 invoice-col">
+                     <b>Invoice Number: </b> @Model.invoiceNumber<br>
+                     <b>Invoice Date: </b> @DateTime.Now<br>
+                 </div>
+                 <!-- /.col -->
+                 <div class="col-sm-4 invoice-col">
+                     <address>
+                        <b>Customer Name: </b>@Model.Customer.Name<br>
+                        <b>Customer Phone: </b> @Model.Customer.Phone<br>
+                     </address>
+                 </div>
+             </div>
+             <!-- /.row -->
+             <!-- Table row -->
+             <div class="row">
+                 <div class="col-xs-12 table-responsive">
+                     <table class="table table-striped">
+                         <thead>
+                             <tr>
+                                <th>No</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Discount</th>
+                                <th>Sub total</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+                             @foreach (var item in Model.customerInvoiceLine)
+                             {
+                                 <tr>
+                                    <td>@counter</td>
+                                    <td>@item.product?.Name</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.Price</td>
+                                    <td>@item.Discount</td>
+                                    <td>@item.SubAmount</td>
+                                 </tr>
+                                counter++;
+                            }
+
+                         </tbody>
+                     </table>
+                 </div>
+                 <!-- /.col -->
+             </div>
+             <!-- /.row -->
+             <div class="row">
+               
+                 <!-- /.col -->
+                 <div class="col-xs-6">
+                     <p class="lead"></p>
+                     <div class="table-responsive">
+                         <table class="table">
+                            <tr>
+                                <th style="width:33%">Total</th>
+                                <td id="total">
+                                    @Model.Total  ج.م
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="width:33%">المدفوع</th>
+                                <td>@ViewBag.PaidAmount  ج.م</td>
+                            </tr>
+                            <tr>
+                                <th style="width:33%">الباقي</th>
+                                <td>@ViewBag.RemainingAmount  ج.م</td>
+                            </tr>
+                         </table>
+                     </div>
+                 </div>
+                 <!-- /.col -->
+             </div>
+             <!-- /.row -->
+         </section>
+         <!-- /.content -->
+     </div>
+ </body>
+ </html>
