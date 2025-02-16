@@ -1,19 +1,20 @@
 ﻿@model IEnumerable<CustomerInvoice>
-<a asp-controller="CustomerInvoice" asp-action="Upsert" class="btn btn-primary">
+<a asp-controller="CustomerInvoice" asp-action="Upsert" class="btn btn-primary reset-form-submission">
     <i class="bi bi-plus-circle-dotted"></i> إضافة فاتورة العميل
 </a>
 <div style="padding-bottom: 18px;"></div>
 <table id="customerInvoiceTable" class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Customer.Name)
-            </th>
+           
             <th>
                 @Html.DisplayNameFor(model => model.Date)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Total)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.invoiceNumber)
             </th>
             <th></th>
         </tr>
@@ -23,13 +24,13 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Customer.Name)
-                </td>
-                <td>
                     @Html.DisplayFor(modelItem => item.Date)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Total)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.invoiceNumber)
                 </td>
                 <td>
                     <a asp-action="Details" asp-route-id="@item.Id"><i class="fa fa-list"></i></a> |
@@ -40,5 +41,20 @@
     </tbody>
 </table>
 @section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Handle button click
+            $(document).on("click", ".reset-form-submission", function (e) {
+                e.preventDefault(); // Prevent the default link behavior
+
+                // Set a flag in localStorage to trigger form reset in the original view
+                console.log("Setting reset flag in localStorage...");
+                localStorage.setItem("resetFormSubmission", "true");
+
+                // Navigate to the desired action
+                window.location.href = $(this).attr("href");
+            });
+        });
+    </script>
     <script src="~/js/customerinvoice.js"></script>
 }

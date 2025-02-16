@@ -23,13 +23,14 @@ namespace Models
         [Display(Name = "رقم الفاتورة")]
         [Required]
         public string invoiceNumber { get; set; }
-        [Display(Name = "اسم العميل")]
-		public int CustomerId { get; set; }
-        [ForeignKey("CustomerId")]
-        [ValidateNever]
-        public Customer Customer { get; set; } // The customer associated with the receipt.
+  //      [Display(Name = "اسم العميل")]
+		//public int CustomerId { get; set; }
+  //      [ForeignKey("CustomerId")]
+  //      [ValidateNever]
+  //      public Customer Customer { get; set; } // The customer associated with the receipt.
         [Display(Name = "التاريخ")]
         public DateTime Date { get; set; }
+        [Display(Name = "الاجمالي")]
         public decimal Total { get; set; }
         public List<CustomerInvoiceLine> customerInvoiceLine { get; set; } = new List<CustomerInvoiceLine>();
 	}

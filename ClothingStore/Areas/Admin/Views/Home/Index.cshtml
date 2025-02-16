@@ -1,46 +1,319 @@
-﻿<div class="watermark-container">
-    <div class="watermark">Pharmacy Management System</div>
-</div>
+﻿@* @{
+    ViewData["Title"] = "Sales Dashboard";
+}
+
+<!-- Include Bootstrap CSS (if not already included in _Layout.cshtml) -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
 <style>
-    html, body {
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
         margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow: hidden; /* Disable scrolling */
+        padding: 20px;
     }
 
-    .watermark {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) rotate(0deg);
-        color: rgb(2 2 2 / 30%);
-        font-size: 3vw;
-        font-weight: bold;
-        text-transform: uppercase;
-        pointer-events: none;
-        user-select: none;
-        white-space: nowrap;
-    }
-    .watermark-container {
-        position: relative;
-        height: 100vh; /* Takes the full height of the viewport */
-        width: 100vw; /* Takes the full width of the viewport */
+    h2 {
+        color: #333;
+        margin-top: 30px;
+        margin-bottom: 15px;
     }
 
-    .background-image {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 102%;
-        height: 100%;
-        object-fit: fill; /* Ensure the image covers the viewport without stretching */
-        object-position: center; /* Center the image */
+    .chart-container {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 30px;
     }
 
-    .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
-        padding-left: 165px;
-        top: 55px;
+    canvas {
+        max-width: 100%;
+        height: auto !important;
     }
-
 </style>
+
+<div class="container">
+    <div class="row">
+        <!-- Chart 1: إجمالي الأرباح لكل عميل (Bar Chart) -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h2>إجمالي الأرباح لكل عميل</h2>
+                <canvas id="profitPerCustomerChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: إجمالي الأرباح لكل عميل شهريًا (Bar Chart) -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h2>إجمالي الأرباح لكل عميل شهريًا</h2>
+                <canvas id="profitPerCustomerMonthlyChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Chart 3: إجمالي المبيعات لكل عميل (Bar Chart) -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h2>إجمالي المبيعات لكل عميل</h2>
+                <canvas id="salesPerCustomerChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 4: إجمالي المبيعات لكل عميل شهريًا (Bar Chart) -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h2>إجمالي المبيعات لكل عميل شهريًا</h2>
+                <canvas id="salesPerCustomerMonthlyChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Chart 5: كمية المنتجات المتبقية (Doughnut Chart) -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h2>كمية المنتجات المتبقية</h2>
+                <canvas id="remainingProductsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Chart 1: إجمالي الأرباح لكل عميل (Bar Chart)
+        var profitPerCustomerData = @Html.Raw(Json.Serialize(ViewBag.ProfitPerCustomer));
+        var customerLabels = profitPerCustomerData.map(item => item.customerName);
+        var customerProfits = profitPerCustomerData.map(item => item.totalProfit);
+
+        var ctx1 = document.getElementById('profitPerCustomerChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: customerLabels,
+                datasets: [{
+                    label: 'إجمالي الأرباح',
+                    data: customerProfits,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'إجمالي الأرباح لكل عميل',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 2: إجمالي الأرباح لكل عميل شهريًا (Bar Chart)
+        var profitPerCustomerMonthlyData = @Html.Raw(Json.Serialize(ViewBag.ProfitPerCustomerMonthly));
+        var monthlyLabels = profitPerCustomerMonthlyData.map(item => `${item.customerName} - ${item.year}/${item.month}`);
+        var monthlyProfits = profitPerCustomerMonthlyData.map(item => item.totalProfit);
+
+        var ctx2 = document.getElementById('profitPerCustomerMonthlyChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'إجمالي الأرباح',
+                    data: monthlyProfits,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'إجمالي الأرباح لكل عميل شهريًا',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 3: إجمالي المبيعات لكل عميل (Bar Chart)
+        var salesPerCustomerData = @Html.Raw(Json.Serialize(ViewBag.SalesPerCustomer));
+        var salesCustomerLabels = salesPerCustomerData.map(item => item.customerName);
+        var salesCustomerTotals = salesPerCustomerData.map(item => item.totalSales);
+
+        var ctx3 = document.getElementById('salesPerCustomerChart').getContext('2d');
+        new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: salesCustomerLabels,
+                datasets: [{
+                    label: 'إجمالي المبيعات',
+                    data: salesCustomerTotals,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'إجمالي المبيعات لكل عميل',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 4: إجمالي المبيعات لكل عميل شهريًا (Bar Chart)
+        var salesPerCustomerMonthlyData = @Html.Raw(Json.Serialize(ViewBag.SalesPerCustomerMonthly));
+        var salesMonthlyLabels = salesPerCustomerMonthlyData.map(item => `${item.customerName} - ${item.year}/${item.month}`);
+        var salesMonthlyTotals = salesPerCustomerMonthlyData.map(item => item.totalSales);
+
+        var ctx4 = document.getElementById('salesPerCustomerMonthlyChart').getContext('2d');
+        new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: salesMonthlyLabels,
+                datasets: [{
+                    label: 'إجمالي المبيعات',
+                    data: salesMonthlyTotals,
+                    backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'إجمالي المبيعات لكل عميل شهريًا',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart 5: كمية المنتجات المتبقية (Doughnut Chart)
+        var remainingProductsData = @Html.Raw(Json.Serialize(ViewBag.RemainingProducts));
+        var productLabels = remainingProductsData.map(item => item.productName);
+        var productQuantities = remainingProductsData.map(item => item.remainingQuantity);
+
+        var ctx5 = document.getElementById('remainingProductsChart').getContext('2d');
+        new Chart(ctx5, {
+            type: 'doughnut',
+            data: {
+                labels: productLabels,
+                datasets: [{
+                    data: productQuantities,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(255, 159, 64, 0.6)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'كمية المنتجات المتبقية',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+} *@

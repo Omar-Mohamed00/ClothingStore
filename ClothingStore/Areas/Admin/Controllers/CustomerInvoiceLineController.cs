@@ -22,15 +22,23 @@ namespace ClothingStore.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        // GET: CustomerInvoiceLine
-        public IActionResult Index()
+        public IActionResult Index(int customerInvoiceId, string invoiceNumber)
         {
-            List<CustomerInvoiceLine> CustomerInvoiceLineList = _unitOfWork.CustomerInvoiceLine
-                .GetAll(includeProperties: "customerInvoice,medicine").ToList();
-            return View(CustomerInvoiceLineList);
+            List<CustomerInvoiceLine> customerInvoiceLineList = _unitOfWork.CustomerInvoiceLine
+                .GetAll(u => u.customerInvoiceId == customerInvoiceId && u.customerInvoice.invoiceNumber == invoiceNumber,
+                        includeProperties: "customerInvoice,medicine")
+                .ToList();
+
+            return View(customerInvoiceLineList);
         }
-        public IActionResult Upsert(int? id) //Update Insert => Upsert
+
+        public IActionResult Upsert(int? id)
         {
+            // Fetch the latest invoice to auto-assign
+            var latestInvoice = _unitOfWork.Receipt.GetAll()
+                .OrderByDescending(i => i.Id)
+                .FirstOrDefault();
+
             CustomerInvoiceVM customerInvoiceVM = new()
             {
                 MedicineList = _unitOfWork.Product.GetAll().Select(u => new SelectListItem
@@ -38,56 +46,72 @@ namespace ClothingStore.Areas.Admin.Controllers
                     Text = u.Name,
                     Value = u.Id.ToString()
                 }),
-				CustomerList = _unitOfWork.Receipt.GetAll().Select(u => new SelectListItem
-				{
-					Text = u.invoiceNumber,
-					Value = u.Id.ToString()
-				}),
-                CustomerInvoice = new CustomerInvoice(),
+                CustomerList = _unitOfWork.Receipt.GetAll().Select(u => new SelectListItem
+                {
+                    Text = u.invoiceNumber,
+                    Value = u.Id.ToString()
+                }),
+                CustomerInvoice = latestInvoice ?? new CustomerInvoice(),
                 CustomerInvoiceLine = new CustomerInvoiceLine()
             };
-            var firstInvoiceNumber = customerInvoiceVM.CustomerList.FirstOrDefault();
 
-            if (firstInvoiceNumber != null)
-            {
-                customerInvoiceVM.CustomerList = customerInvoiceVM.CustomerList.Take(1);
-
-            }
             if (id == null || id == 0)
             {
-                // Create
-                //return View(customerInvoiceVM);
-                return PartialView("~/Views/Shared/_UpsertPartialView.cshtml", customerInvoiceVM);
+                // Create Mode: Auto-set `customerInvoiceId` to the latest invoice
+                if (latestInvoice != null)
+                {
+                    customerInvoiceVM.CustomerInvoiceLine.customerInvoiceId = latestInvoice.Id;
+                }
 
+                return PartialView("~/Views/Shared/_UpsertPartialView.cshtml", customerInvoiceVM);
             }
             else
             {
-                // Update
-                customerInvoiceVM.CustomerInvoiceLine = _unitOfWork.CustomerInvoiceLine.Get(u => u.customerInvoiceLineId == id);
-                //return View(customerInvoiceVM);
-                return PartialView("~/Views/Shared/_UpsertPartialView.cshtml", customerInvoiceVM);
+                // Update Mode: Retrieve existing `CustomerInvoiceLine`
+                var existingInvoiceLine = _unitOfWork.CustomerInvoiceLine.Get(
+                    u => u.customerInvoiceLineId == id,
+                    includeProperties: "customerInvoice");
 
+                if (existingInvoiceLine == null)
+                {
+                    return NotFound(); // Handle invalid ID case
+                }
+
+                customerInvoiceVM.CustomerInvoiceLine = existingInvoiceLine;
+                customerInvoiceVM.CustomerInvoice = existingInvoiceLine.customerInvoice; // Keep the correct invoice
+
+                return PartialView("~/Views/Shared/_UpsertPartialView.cshtml", customerInvoiceVM);
             }
         }
         [HttpPost]
         public IActionResult Upsert(CustomerInvoiceVM customerInvoiceVM)
         {
+            Console.WriteLine($"Received customerInvoiceLineId: {customerInvoiceVM.CustomerInvoiceLine.customerInvoiceLineId}");
+            Console.WriteLine($"Received customerInvoiceId: {customerInvoiceVM.CustomerInvoice.Id}");
+
+            if (customerInvoiceVM.CustomerInvoiceLine.customerInvoiceLineId == 0)
+            {
+                Console.WriteLine("CustomerInvoiceLine ID is missing! Form might not be binding correctly.");
+            }
 
             if (ModelState.IsValid)
             {
                 var medicine = _unitOfWork.Product.Get(m => m.Id == customerInvoiceVM.CustomerInvoiceLine.ProductId);
                 if (medicine is null)
                 {
-                    return RedirectToAction("Details", "CustomerInvoice",new { customerInvoiceVM.CustomerInvoice.Id});
+                    return RedirectToAction("Upsert", "CustomerInvoice", new { id = customerInvoiceVM.CustomerInvoice.Id });
                 }
+
                 customerInvoiceVM.CustomerInvoiceLine.Price = medicine.PurchasePrice;
-                
                 customerInvoiceVM.CustomerInvoiceLine.SubAmount =
                     (customerInvoiceVM.CustomerInvoiceLine.Quantity * customerInvoiceVM.CustomerInvoiceLine.Price) -
                     customerInvoiceVM.CustomerInvoiceLine.Discount;
 
+                if (customerInvoiceVM.CustomerInvoiceLine.customerInvoiceId == 0)
+                {
+                    customerInvoiceVM.CustomerInvoiceLine.customerInvoiceId = customerInvoiceVM.CustomerInvoice.Id;
+                }
 
-                customerInvoiceVM.CustomerInvoiceLine.customerInvoiceId = customerInvoiceVM.CustomerInvoice.Id;
                 if (customerInvoiceVM.CustomerInvoiceLine.customerInvoiceLineId == 0)
                 {
                     _unitOfWork.CustomerInvoiceLine.Add(customerInvoiceVM.CustomerInvoiceLine);
@@ -96,12 +120,115 @@ namespace ClothingStore.Areas.Admin.Controllers
                 {
                     _unitOfWork.CustomerInvoiceLine.Update(customerInvoiceVM.CustomerInvoiceLine);
                 }
-                _unitOfWork.save();
-                return RedirectToAction("Details", "CustomerInvoice",new { customerInvoiceVM.CustomerInvoice.Id});
 
+                _unitOfWork.save();
+                return RedirectToAction("Upsert", "CustomerInvoice", new { id = customerInvoiceVM.CustomerInvoice.Id });
             }
+
             return PartialView("~/Views/Shared/_UpsertPartialView.cshtml", customerInvoiceVM);
         }
+
+        //public IActionResult Upsert(int? id)
+        //{
+        //    // Fetch the latest invoice to auto-assign
+        //    var latestInvoice = _unitOfWork.Receipt.GetAll()
+        //        .OrderByDescending(i => i.Id)
+        //        .FirstOrDefault();
+
+        //    CustomerInvoiceVM customerInvoiceVM = new()
+        //    {
+        //        MedicineList = _unitOfWork.Product.GetAll().Select(u => new SelectListItem
+        //        {
+        //            Text = u.Name,
+        //            Value = u.Id.ToString()
+        //        }),
+        //        CustomerList = _unitOfWork.Receipt.GetAll().Select(u => new SelectListItem
+        //        {
+        //            Text = u.invoiceNumber,
+        //            Value = u.Id.ToString()
+        //        }),
+        //        CustomerInvoice = latestInvoice ?? new CustomerInvoice(),
+        //        CustomerInvoiceLine = new CustomerInvoiceLine()
+        //    };
+
+        //    if (id == null || id == 0)
+        //    {
+        //        // Create Mode: Auto-set `customerInvoiceId` to the latest invoice
+        //        if (latestInvoice != null)
+        //        {
+        //            customerInvoiceVM.CustomerInvoiceLine.customerInvoiceId = latestInvoice.Id;
+        //        }
+
+        //        return PartialView("~/Views/Shared/_UpsertPartialView.cshtml", customerInvoiceVM);
+        //    }
+        //    else
+        //    {
+        //        // Update Mode: Retrieve existing `CustomerInvoiceLine`
+        //        var existingInvoiceLine = _unitOfWork.CustomerInvoiceLine.Get(
+        //            u => u.customerInvoiceLineId == id,
+        //            includeProperties: "customerInvoice");
+
+        //        if (existingInvoiceLine == null)
+        //        {
+        //            return NotFound(); // Handle invalid ID case
+        //        }
+
+        //        customerInvoiceVM.CustomerInvoiceLine = existingInvoiceLine;
+        //        customerInvoiceVM.CustomerInvoice = existingInvoiceLine.customerInvoice; // Keep the correct invoice
+
+        //        return PartialView("~/Views/Shared/_UpsertPartialView.cshtml", customerInvoiceVM);
+        //    }
+        //}
+
+        //[HttpPost]
+        //public IActionResult Upsert(CustomerInvoiceVM customerInvoiceVM)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        // Fetch the selected Medicine
+        //        var medicine = _unitOfWork.Product.Get(m => m.Id == customerInvoiceVM.CustomerInvoiceLine.ProductId);
+        //        if (medicine is null)
+        //        {
+        //            return RedirectToAction("Details", "CustomerInvoice", new { id = customerInvoiceVM.CustomerInvoice.Id });
+        //        }
+
+        //        // Set Price and SubAmount correctly
+        //        customerInvoiceVM.CustomerInvoiceLine.Price = medicine.PurchasePrice;
+        //        customerInvoiceVM.CustomerInvoiceLine.SubAmount =
+        //            (customerInvoiceVM.CustomerInvoiceLine.Quantity * customerInvoiceVM.CustomerInvoiceLine.Price) -
+        //            customerInvoiceVM.CustomerInvoiceLine.Discount;
+
+        //        // Ensure `customerInvoiceId` is set correctly
+        //        if (customerInvoiceVM.CustomerInvoiceLine.customerInvoiceId == 0)
+        //        {
+        //            //var selectedInvoice = _unitOfWork.Receipt.Get(i => i.Id == customerInvoiceVM.CustomerInvoice.Id);
+        //            var selectedInvoiceLine = _unitOfWork.CustomerInvoiceLine.Get(i => i.customerInvoiceLineId == customerInvoiceVM.CustomerInvoiceLine.customerInvoiceLineId);
+        //            if (selectedInvoiceLine == null)
+        //            {
+        //                return RedirectToAction("Details", "CustomerInvoice", new { id = customerInvoiceVM.CustomerInvoice.Id });
+        //            }
+        //            //customerInvoiceVM.CustomerInvoiceLine.customerInvoiceId = selectedInvoice.Id;
+        //            customerInvoiceVM.CustomerInvoiceLine.customerInvoiceId = selectedInvoiceLine.customerInvoiceLineId;
+        //        }
+
+        //        // Insert or Update logic
+        //        if (customerInvoiceVM.CustomerInvoiceLine.customerInvoiceLineId == 0)
+        //        {
+        //            _unitOfWork.CustomerInvoiceLine.Add(customerInvoiceVM.CustomerInvoiceLine);
+        //        }
+        //        else
+        //        {
+        //            _unitOfWork.CustomerInvoiceLine.Update(customerInvoiceVM.CustomerInvoiceLine);
+        //        }
+
+        //        _unitOfWork.save();
+        //        return RedirectToAction("Details", "CustomerInvoice", new { id = customerInvoiceVM.CustomerInvoice.Id });
+        //    }
+
+        //    return PartialView("~/Views/Shared/_UpsertPartialView.cshtml", customerInvoiceVM);
+        //}
+
+
 
         #region API Calls
 
@@ -119,6 +246,13 @@ namespace ClothingStore.Areas.Admin.Controllers
 
             return Json(new { success = true, message = "Delete Successful" });
         }
+        [HttpGet]
+        public JsonResult GetLatestInvoiceId()
+        {
+            var latestInvoice = _unitOfWork.Receipt.GetAll().OrderByDescending(x => x.Id).FirstOrDefault();
+            return Json(new { id = latestInvoice?.Id ?? 0 });
+        }
+
         #endregion
     }
 }

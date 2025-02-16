@@ -30,8 +30,8 @@ namespace Models
         [Display(Name = "التخفيض")]
         public decimal Discount { get; set; }
 
-		[Display(Name = " المبلغ الفرعي")]
-        public decimal SubAmount { get; set; }
+        [Display(Name = " المبلغ الفرعي")]
+        public decimal SubAmount { get; set; } = 0;
 
         [Display(Name = "Customer Invoice")]
         public int customerInvoiceId { get; set; }

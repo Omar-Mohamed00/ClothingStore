@@ -89,9 +89,10 @@
              <!-- title row -->
              <div class="row">
                  <div class="col-xs-12">
-                     <h2 class="page-header">
-                         <i class="fa fa-globe"></i> Company Name
-                     </h2>
+                    <img src="~/assets/LogoClothingStore.jpg" style="
+                        WIDTH: 400PX;
+                        HEIGHT: 400PX;    margin-left: 88px;
+                    " alt="DENANA"/>
                  </div>
                  <!-- /.col -->
              </div>
@@ -99,16 +100,10 @@
              <div class="row invoice-info">
                  <!-- /.col -->
                  <div class="col-sm-4 invoice-col">
-                     <b>Invoice Number: </b> @Model.invoiceNumber<br>
-                     <b>Invoice Date: </b> @DateTime.Now<br>
+                    <b>Invoice number: </b> @Model.invoiceNumber<br>
+                    <b>Invoice date: </b> @DateTime.Now<br>
                  </div>
                  <!-- /.col -->
-                 <div class="col-sm-4 invoice-col">
-                     <address>
-                        <b>Customer Name: </b>@Model.Customer.Name<br>
-                        <b>Customer Phone: </b> @Model.Customer.Phone<br>
-                     </address>
-                 </div>
              </div>
              <!-- /.row -->
              <!-- Table row -->
@@ -153,7 +148,7 @@
                      <div class="table-responsive">
                          <table class="table">
                             <tr>
-                                <th style="width:33%">Total</th>
+                                <th style="width:33%">الاجمالي</th>
                                 <td id="total">
                                     @Model.Total  ج.م
                                 </td>
