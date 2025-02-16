@@ -55,16 +55,12 @@ namespace ClothingStore.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var customerInvoice =  _context.CustomerInvoices
-                .Include(c => c.customerInvoiceLine)
-                .ThenInclude(line => line.product) // Assuming Item is related to CustomerInvoiceLine
-                .SingleOrDefault(m => m.Id == id);
+            var customerInvoice = _unitOfWork.Receipt.Get(
+                u => u.Id == id,
+                includeProperties: "customerInvoiceLine,customerInvoiceLine.product" // Include product
+            ) ?? new CustomerInvoice();
 
-
-
-            // Fetch existing invoice
-            customerInvoice = _unitOfWork.Receipt.Get(u => u.Id == id, includeProperties: "customerInvoiceLine") ?? new CustomerInvoice();
-
+            
             if (customerInvoice.customerInvoiceLine != null)
             {
                 customerInvoice.Total = customerInvoice.customerInvoiceLine.Sum(line => line.SubAmount);
@@ -123,8 +119,6 @@ namespace ClothingStore.Areas.Admin.Controllers
                 .Include(c => c.customerInvoiceLine)
                 .ThenInclude(line => line.product) // Assuming Item is related to CustomerInvoiceLine
                 .SingleOrDefaultAsync(m => m.Id == id);
-
-            //customerInvoice.Total = customerInvoice.customerInvoiceLine.Sum(line => line.SubAmount);
 
             if (customerInvoice == null)
             {

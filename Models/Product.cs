@@ -22,12 +22,7 @@ namespace Models
 		public decimal PurchasePrice { get; set; }
         [DisplayName("سعر البيع")]
 		public decimal SellingPrice { get; set; }
-        [Required]
-        [DisplayName("المقاس")]
-		public string? Size { get; set; } // S, M, L, XL, XXL
-        [Required]
-        [DisplayName("اللون")]
-		public string? Color { get; set; }
+        
         [Required(ErrorMessage = "Category is required.")]
         [DisplayName("الفئة")]
 		public int? CategoryId { get; set; } // Foreign key

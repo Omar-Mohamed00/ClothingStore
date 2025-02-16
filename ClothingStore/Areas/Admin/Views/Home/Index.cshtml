@@ -1,8 +1,7 @@
-﻿@* @{
+﻿@{
     ViewData["Title"] = "Sales Dashboard";
 }
 
-<!-- Include Bootstrap CSS (if not already included in _Layout.cshtml) -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 <style>
@@ -35,46 +34,34 @@
 
 <div class="container">
     <div class="row">
-        <!-- Chart 1: إجمالي الأرباح لكل عميل (Bar Chart) -->
         <div class="col-md-6">
             <div class="chart-container">
-                <h2>إجمالي الأرباح لكل عميل</h2>
-                <canvas id="profitPerCustomerChart" width="400" height="200"></canvas>
+                <canvas id="totalProfitChart"></canvas>
             </div>
         </div>
-
-        <!-- Chart 2: إجمالي الأرباح لكل عميل شهريًا (Bar Chart) -->
         <div class="col-md-6">
             <div class="chart-container">
-                <h2>إجمالي الأرباح لكل عميل شهريًا</h2>
-                <canvas id="profitPerCustomerMonthlyChart" width="400" height="200"></canvas>
+                <canvas id="profitPerMonthlyChart"></canvas>
             </div>
         </div>
     </div>
-
     <div class="row">
-        <!-- Chart 3: إجمالي المبيعات لكل عميل (Bar Chart) -->
         <div class="col-md-6">
             <div class="chart-container">
-                <h2>إجمالي المبيعات لكل عميل</h2>
-                <canvas id="salesPerCustomerChart" width="400" height="200"></canvas>
+                <canvas id="totalSalesChart"></canvas>
             </div>
         </div>
-
         <!-- Chart 4: إجمالي المبيعات لكل عميل شهريًا (Bar Chart) -->
         <div class="col-md-6">
             <div class="chart-container">
-                <h2>إجمالي المبيعات لكل عميل شهريًا</h2>
-                <canvas id="salesPerCustomerMonthlyChart" width="400" height="200"></canvas>
+                <canvas id="salesPerMonthChart" width="400" height="200"></canvas>
             </div>
         </div>
     </div>
-
     <div class="row">
         <!-- Chart 5: كمية المنتجات المتبقية (Doughnut Chart) -->
         <div class="col-md-6">
             <div class="chart-container">
-                <h2>كمية المنتجات المتبقية</h2>
                 <canvas id="remainingProductsChart" width="400" height="200"></canvas>
             </div>
         </div>
@@ -82,62 +69,14 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Chart 1: إجمالي الأرباح لكل عميل (Bar Chart)
-        var profitPerCustomerData = @Html.Raw(Json.Serialize(ViewBag.ProfitPerCustomer));
-        var customerLabels = profitPerCustomerData.map(item => item.customerName);
-        var customerProfits = profitPerCustomerData.map(item => item.totalProfit);
-
-        var ctx1 = document.getElementById('profitPerCustomerChart').getContext('2d');
-        new Chart(ctx1, {
-            type: 'bar',
-            data: {
-                labels: customerLabels,
-                datasets: [{
-                    label: 'إجمالي الأرباح',
-                    data: customerProfits,
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'إجمالي الأرباح لكل عميل',
-                        font: {
-                            size: 16
-                        }
-                    },
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
-
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
         // Chart 2: إجمالي الأرباح لكل عميل شهريًا (Bar Chart)
-        var profitPerCustomerMonthlyData = @Html.Raw(Json.Serialize(ViewBag.ProfitPerCustomerMonthly));
-        var monthlyLabels = profitPerCustomerMonthlyData.map(item => `${item.customerName} - ${item.year}/${item.month}`);
+        var profitPerCustomerMonthlyData = @Html.Raw(Json.Serialize(ViewBag.ProfitPerMonthly));
+        var monthlyLabels = profitPerCustomerMonthlyData.map(item => `${item.year}/${item.month}`);
         var monthlyProfits = profitPerCustomerMonthlyData.map(item => item.totalProfit);
 
-        var ctx2 = document.getElementById('profitPerCustomerMonthlyChart').getContext('2d');
+        var ctx2 = document.getElementById('profitPerMonthlyChart').getContext('2d');
         new Chart(ctx2, {
             type: 'bar',
             data: {
@@ -155,7 +94,7 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'إجمالي الأرباح لكل عميل شهريًا',
+                        text: 'إجمالي الأرباح شهريًا',
                         font: {
                             size: 16
                         }
@@ -179,61 +118,14 @@
                 }
             }
         });
+        </script>
+        <script>
+             // Chart 4: إجمالي المبيعات لكل عميل شهريًا (Bar Chart)
+        var salesPerMonth = @Html.Raw(Json.Serialize(ViewBag.SalesPerMonth));
+        var salesMonthlyLabels = salesPerMonth.map(item => `${item.year}/${item.month}`);
+        var salesMonthlyTotals = salesPerMonth.map(item => item.totalSales);
 
-        // Chart 3: إجمالي المبيعات لكل عميل (Bar Chart)
-        var salesPerCustomerData = @Html.Raw(Json.Serialize(ViewBag.SalesPerCustomer));
-        var salesCustomerLabels = salesPerCustomerData.map(item => item.customerName);
-        var salesCustomerTotals = salesPerCustomerData.map(item => item.totalSales);
-
-        var ctx3 = document.getElementById('salesPerCustomerChart').getContext('2d');
-        new Chart(ctx3, {
-            type: 'bar',
-            data: {
-                labels: salesCustomerLabels,
-                datasets: [{
-                    label: 'إجمالي المبيعات',
-                    data: salesCustomerTotals,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'إجمالي المبيعات لكل عميل',
-                        font: {
-                            size: 16
-                        }
-                    },
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
-
-        // Chart 4: إجمالي المبيعات لكل عميل شهريًا (Bar Chart)
-        var salesPerCustomerMonthlyData = @Html.Raw(Json.Serialize(ViewBag.SalesPerCustomerMonthly));
-        var salesMonthlyLabels = salesPerCustomerMonthlyData.map(item => `${item.customerName} - ${item.year}/${item.month}`);
-        var salesMonthlyTotals = salesPerCustomerMonthlyData.map(item => item.totalSales);
-
-        var ctx4 = document.getElementById('salesPerCustomerMonthlyChart').getContext('2d');
+        var ctx4 = document.getElementById('salesPerMonthChart').getContext('2d');
         new Chart(ctx4, {
             type: 'bar',
             data: {
@@ -251,7 +143,7 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'إجمالي المبيعات لكل عميل شهريًا',
+                        text: 'إجمالي المبيعات شهريًا',
                         font: {
                             size: 16
                         }
@@ -275,8 +167,10 @@
                 }
             }
         });
-
-        // Chart 5: كمية المنتجات المتبقية (Doughnut Chart)
+        </script>
+        <script>
+           
+             // Chart 5: كمية المنتجات المتبقية (Doughnut Chart)
         var remainingProductsData = @Html.Raw(Json.Serialize(ViewBag.RemainingProducts));
         var productLabels = remainingProductsData.map(item => item.productName);
         var productQuantities = remainingProductsData.map(item => item.remainingQuantity);
@@ -315,5 +209,37 @@
                 }
             }
         });
-    </script>
-} *@
+        </script>
+        <script>
+            var totalProfitData = @Html.Raw(Json.Serialize(ViewBag.TotalProfit)) || 0;
+            var totalSalesData = @Html.Raw(Json.Serialize(ViewBag.TotalSales)) || 0;
+
+            function createChart(id, type, labels, datasetLabel, data, bgColor, borderColor) {
+                if (!document.getElementById(id)) return;
+                new Chart(document.getElementById(id).getContext('2d'), {
+                    type: type,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: datasetLabel,
+                            data: data,
+                            backgroundColor: bgColor,
+                            borderColor: borderColor,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: { display: true, text: datasetLabel, font: { size: 16 } },
+                            legend: { display: type !== 'bar' }
+                        },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+
+            createChart('totalProfitChart', 'bar', ["الإجمالي"], 'إجمالي الأرباح', [totalProfitData], 'rgba(75, 192, 192, 0.6)', 'rgba(75, 192, 192, 1)');
+            createChart('totalSalesChart', 'bar', ["الإجمالي"], 'إجمالي المبيعات', [totalSalesData], 'rgba(255, 99, 132, 0.6)', 'rgba(255, 99, 132, 1)');
+        </script>
+}

@@ -22,8 +22,6 @@ namespace DataAccess.Repository
 			var objFromDb = _db.Products.FirstOrDefault(u => u.Id == obj.Id);
 			if (objFromDb != null)
 			{
-				objFromDb.Color = obj.Color;
-				objFromDb.Size = obj.Size;
 				objFromDb.Name = obj.Name;
 				objFromDb.Quantity = obj.Quantity;
 				objFromDb.PurchasePrice = obj.PurchasePrice;
