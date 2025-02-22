@@ -2,8 +2,6 @@
     ViewData["Title"] = "Sales Dashboard";
 }
 
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -69,7 +67,7 @@
 </div>
 
 @section Scripts {
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/lib/charts/chart.umd.js"></script>
         <script>
         // Chart 2: إجمالي الأرباح لكل عميل شهريًا (Bar Chart)
         var profitPerCustomerMonthlyData = @Html.Raw(Json.Serialize(ViewBag.ProfitPerMonthly));
