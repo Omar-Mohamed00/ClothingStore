@@ -44,7 +44,21 @@
         });
     });
 });
-
+$(document).ready(function () {
+    // Example: Automatically setting CustomerInvoiceId based on some logic
+    $.ajax({
+        url: '/Admin/CustomerInvoice/GetLatestInvoiceId', // Replace with your API endpoint
+        type: 'GET',
+        success: function (response) {
+            if (response && response.id) {
+                $('#customerInvoiceId').val(response.id);
+            }
+        },
+        error: function () {
+            console.log("Failed to fetch invoice ID");
+        }
+    });
+});
 $(document).ready(function () {
     $('#upsertForm').submit(function (e) {
         e.preventDefault(); // Prevent default form submission
